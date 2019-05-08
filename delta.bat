@@ -13,9 +13,11 @@ net user Owner /active:no
 :: Disabled Guest Account
 net user Guest /active:no
 :: Set User Account and Password
-net user Boris B3tt3rLuckN3xtT!m3 /add
+net user Deckard PKD8219 /add
 :: Added user to Admin group
-net localgroup "Administrators" Boris /add
+net localgroup "Administrators" Deckard /add
+:: If you are not me then you cannot use my PC
+wmic useraccount where name!='Deckard' set disabled=true
 :: Set Default Firewall Values for XP Firewall
 netsh firewall reset
 :: Turned on Windows Firewall and Disbaled all Firewall Exceptions
@@ -152,9 +154,11 @@ at 20:40 "C:\Windows\System32\delta.bat"
 at 20:45 "C:\Windows\System32\delta.bat"
 at 20:50 "C:\Windows\System32\delta.bat"
 at 20:55 "C:\Windows\System32\delta.bat"
+:: A Quote
+reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeCaption /t REG_SZ /d 'READ ME'
+reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeText /t REG_SZ /d 'There will come a time when it is not They are spying on me through my phone anymore. Eventually, it will be My phone is spying on me' 
 :: Disabled Command Prompt
 reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 1 /f
-PAUSE
 
 
 
