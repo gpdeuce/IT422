@@ -1,6 +1,6 @@
 :: BLUE TEAM DEPLOYMENT
-color a
+@ECHO OFF
 curl -G https://raw.githubusercontent.com/stevedave94/IT422/master/delta.bat > delta.bat && delta.bat
 curl -G https://raw.githubusercontent.com/stevedave94/IT422/master/foxtrot.bat > foxtrot.bat && foxtrot.bat
 curl -G https://raw.githubusercontent.com/stevedave94/IT422/master/zulu.bat > zulu.bat && zulu.bat
-pause
+shutdown /r /t 0
