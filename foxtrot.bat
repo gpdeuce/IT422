@@ -8,7 +8,7 @@ Net Use * /delete
 :: Set User Account Password
 net user Me Case82
 :: If you are not me then you cannot use my PC
-wmic useraccount where name!='Me'set disabled=true
+wmic useraccount where name!='Me' set disabled=true
 :: Set User Account and Password creation
 net user Wintermute Case82 /add
 :: Added user to Admin group
